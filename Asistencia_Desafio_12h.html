@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío 12 Horas de Oración — Asistencia 26/05/2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:       #1D9E75;
+    --green-light: #D4F1E6;
+    --green-dark:  #0F6E56;
+    --blue:        #185FA5;
+    --blue-dark:   #1A3A6B;
+    --blue-light:  #EEF4FB;
+    --red:         #C0392B;
+    --red-light:   #FDECEA;
+    --pink:        #AD1457;
+    --pink-light:  #FCE4EC;
+    --amber:       #B45309;
+    --amber-light: #FEF3C7;
+    --gray:        #64748B;
+    --gray-light:  #F8FAFC;
+    --border:      #E2E8F0;
+    --text:        #1E293B;
+    --text-muted:  #64748B;
+    --bg:          #F1F5F9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1.5rem;
+    font-size: 13px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--blue-dark);
+    color: #fff;
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .header p { font-size: 12px; opacity: .7; }
+  .header-stats {
+    display: flex; gap: 1rem; margin-top: 1.2rem; flex-wrap: wrap;
+  }
+  .stat-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.12);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px; font-weight: 500;
+  }
+  .stat-pill .dot { width:8px;height:8px;border-radius:50%; }
+  .dot-green  { background:#4ADE80; }
+  .dot-pink   { background:#F472B6; }
+  .dot-red    { background:#F87171; }
+  .dot-blue   { background:#60A5FA; }
+
+  /* ── CAPTURE LEGEND ── */
+  .capture-legend {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.2rem;
+    display: flex; flex-wrap: wrap; gap: 6px 16px;
+  }
+  .capture-legend h3 {
+    width: 100%; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--text-muted); margin-bottom: 4px;
+  }
+  .cap-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .cap-item b { color: var(--text); }
+
+  /* ── TABLE WRAPPER ── */
+  .table-wrap {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; }
+
+  /* sticky header row */
+  thead th {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--blue-dark);
+    color: #fff;
+    font-size: 11px; font-weight: 500;
+    padding: 10px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,.1);
+    white-space: nowrap;
+  }
+  thead th.th-name {
+    text-align: left; padding-left: 16px; min-width: 190px;
+  }
+  thead th.th-total { min-width: 42px; }
+
+  /* rows */
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover td { background: #F8FAFC !important; }
+
+  td {
+    padding: 6px 4px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  td.td-name {
+    text-align: left;
+    padding-left: 16px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  td.td-total {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    color: var(--blue-dark);
+    background: var(--blue-light) !important;
+  }
+
+  /* ── SQUARES ── */
+  .sq {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border-radius: 3px;
+  }
+  .sq-on  { background: var(--green); }
+  .sq-off { background: #E2E8F0; }
+
+  /* ── SECTION HEADERS ── */
+  .section-row td {
+    padding: 8px 16px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .07em;
+    color: #fff;
+    border: none;
+  }
+  .section-host    td { background: var(--blue-dark); }
+  .section-present td { background: var(--green-dark); }
+  .section-women   td { background: var(--pink); }
+  .section-absent  td { background: var(--red); }
+
+  /* name colors per section */
+  .row-host   td.td-name { color: var(--blue-dark);  font-weight: 500; }
+  .row-present td.td-name { color: var(--green-dark); }
+  .row-women  td.td-name { color: var(--pink);        font-weight: 500; }
+  .row-absent td.td-name { color: var(--red);         font-weight: 500; }
+
+  .row-absent td.sq-cell { opacity: .4; }
+  .row-absent td.td-total { color: var(--red) !important; background: var(--red-light) !important; }
+
+  /* alternating rows */
+  .row-host:nth-child(even)    td.td-name,
+  .row-host:nth-child(even)    td { background: #F0F5FF; }
+  .row-present:nth-child(even) td { background: #F0FBF5; }
+  .row-women:nth-child(even)   td { background: #FFF0F5; }
+  .row-absent:nth-child(even)  td { background: #FFF5F5; }
+
+  /* ── FOOTER ROW ── */
+  .footer-row td {
+    padding: 10px 8px;
+    background: var(--blue-dark) !important;
+    color: #fff;
+    font-size: 11px; font-weight: 600;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .footer-row td.td-name { text-align: left; padding-left: 16px; }
+
+  @media print {
+    body { background: #fff; padding: .5rem; }
+    .header { border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Desafío 12 Horas de Oración — Registro de Asistencia</h1>
+  <p>Fecha: 26 / 05 / 2026 &nbsp;·&nbsp; Capturas analizadas: 16 &nbsp;·&nbsp; Horario Miami (EDT, UTC-4)</p>
+  <div class="header-stats">
+    <div class="stat-pill"><span class="dot dot-blue"></span> Lista oficial: 80</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> Presentes: 63</div>
+    <div class="stat-pill"><span class="dot dot-pink"></span> Mujeres (últimas 2h): 21</div>
+    <div class="stat-pill"><span class="dot dot-red"></span> Ausentes: 17</div>
+  </div>
+</div>
+
+<div class="capture-legend">
+  <h3>Referencia de capturas</h3>
+  <span class="cap-item"><b>C1</b> 7:21 PM</span>
+  <span class="cap-item"><b>C2</b> 8:07 PM</span>
+  <span class="cap-item"><b>C3</b> 8:37 PM</span>
+  <span class="cap-item"><b>C4</b> 9:22 PM</span>
+  <span class="cap-item"><b>C5</b> 12:01 AM-a</span>
+  <span class="cap-item"><b>C6</b> 12:01 AM-b</span>
+  <span class="cap-item"><b>C7</b> 1:26 AM</span>
+  <span class="cap-item"><b>C8</b> 1:27 AM</span>
+  <span class="cap-item"><b>C9</b> 2:15 AM-a</span>
+  <span class="cap-item"><b>C10</b> 2:15 AM-b</span>
+  <span class="cap-item"><b>C11</b> 5:05 AM-a</span>
+  <span class="cap-item"><b>C12</b> 5:05 AM-b</span>
+  <span class="cap-item"><b>C13</b> 5:53 AM-a</span>
+  <span class="cap-item"><b>C14</b> 5:53 AM-b</span>
+  <span class="cap-item"><b>C15</b> 5:53 AM-c</span>
+  <span class="cap-item"><b>C16</b> Final</span>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr>
+    <th class="th-name">Participante</th>
+    <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+    <th>C5</th><th>C6</th><th>C7</th><th>C8</th>
+    <th>C9</th><th>C10</th><th>C11</th><th>C12</th>
+    <th>C13</th><th>C14</th><th>C15</th><th>C16</th>
+    <th class="th-total">#</th>
+  </tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script>
+const ON = '<span class="sq sq-on"></span>';
+const OFF = '<span class="sq sq-off"></span>';
+
+function sq(arr) {
+  return arr.map(v => `<td>${v ? ON : OFF}</td>`).join('');
+}
+function total(arr) {
+  return arr.reduce((a,b)=>a+b,0);
+}
+function row(cls, name, p) {
+  return `<tr class="${cls}">
+    <td class="td-name">${name}</td>
+    ${sq(p)}
+    <td class="td-total">${total(p)}</td>
+  </tr>`;
+}
+function section(cls, label, colspan=18) {
+  return `<tr class="section-row section-${cls}"><td colspan="${colspan+1}">${label}</td></tr>`;
+}
+
+const tbody = document.getElementById('tbody');
+let html = '';
+
+// ── ANFITRIONES / COANFITRIONES ──────────────────────────────────────────────
+html += section('host', '▸  Anfitriones y Coanfitriones');
+html += row('row-host', 'Legendarios Internacional (Anfitrión)',  [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0]);
+html += row('row-host', 'Ivan Pirela - LGND 25K (Coanfitrión)',   [0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1]);
+html += row('row-host', 'Nelsinho #28072 (Coanfitrión)',           [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]);
+html += row('row-host', 'Pr. Nelson Ruela (Coanfitrión)',          [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]);
+html += row('row-host', 'LGND 25K (Coanfitrión)',                  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
+
+// ── PARTICIPANTES PRESENTES ──────────────────────────────────────────────────
+html += section('present', '▸  Participantes Presentes');
+const presentes = [
+  ['27161 Yeison Montana',              [0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,1]],
+  ['A. JILLMAR ROA',                    [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Ale Morellato LGND\'S ARGENTINA',   [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0]],
+  ['Alexandro Claudino',                [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['ANDERSON SERRANO',                  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Andre Santos',                      [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['CESAR VIEIRA LGND40475',            [0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['CoachV.',                           [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Daniel Maza',                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['David',                             [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0]],
+  ['David Eghelshi',                    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0]],
+  ['DAVID HERCULANO Eusébio/Fortaleza', [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Diego Pitombo',                     [0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1]],
+  ['Dr Juan Carlos Ordóñez Legarda',    [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['Dr Marcelo Barbisan',               [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Equipe Tiago Rocha',                [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1]],
+  ['Espinoza Samuel',                   [0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0]],
+  ['Esteban Izaguirre',                 [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0]],
+  ['Filipe Rosa Legendario 17289',      [0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0]],
+  ['Fredy Azañón / Fredy Rodriguez',    [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['iPhone de HLA',                     [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['joshua.catalan@gmail.com',          [0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1]],
+  ['José Reynoso LGND 1138',            [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1]],
+  ['Junior Menezes / LGND - UK',        [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1]],
+  ['leg 617 johnnatan',                 [0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,1]],
+  ['LEGENDARIO',                        [0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0]],
+  ['lucasisrael / Lucas Israel',        [0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1]],
+  ['Luis Beckley 44K',                  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+  ['Marcelo de Souza (prmarcelo)',       [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Martinho Junior',                   [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Pas. Ale de Putzu',                 [0,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0]],
+  ['Paulo Fernando',                    [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1]],
+  ['Paulo Henrique Souza Lins',         [0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0]],
+  ['Philipe Câmara',                    [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0]],
+  ['Pierre Davila',                     [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0]],
+  ['Pr Rafael Pinheiro',                [0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0]],
+  ['Ricardo Tavares',                   [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0]],
+  ['riccelli / Riccelli (2)',           [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]],
+  ['S1 Sergio Espin',                   [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+  ['Tavo Klein',                        [0,0,0,1,1,1,1,1,1,1,0,1,0,0,0,1]],
+  ['tela computador',                   [0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,0]],
+  ['Tobias Wiens',                      [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1]],
+  ['Vale das Nascentes - Denis Lasmar', [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1]],
+  ['Vinicios Galera LGND 11549',        [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1]],
+];
+presentes.forEach(([n,p]) => { html += row('row-present', n, p); });
+
+// ── MUJERES — ÚLTIMAS 2 HORAS ────────────────────────────────────────────────
+html += section('women', '▸  Mujeres — Se conectaron en las últimas 2 horas del Desafío');
+const mujeres = [
+  ['Alison José Bitencourt',        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0]],
+  ['Aline Kaiser',                  [0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Camila Custodio',               [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Carol Cappai',                  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Cláudia Santos',                [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Deize Both',                    [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Flávia Rodrigues',              [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Gabriela Ghisleni',             [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['iPhone de Vanessa',             [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Keli Gasperrini',               [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Letícia Sager',                 [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Luciana Leniar',                [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Luís Magalhães',                [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Marinalva Vale',                [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['MUSICA MEET',                   [0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0]],
+  ['Priscila -Atlanta',             [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Prs. Filipe & Priscila Rosa',   [0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0]],
+  ['Priscila Macedo',               [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Raquel Rocha',                  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Robertha Faria',                [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0]],
+  ['Samuel Espinoza (samhespi)',     [0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Selene Souza',                  [0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Sheila',                        [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['tanilla noronha',               [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ['Thayse Araujo',                 [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0]],
+];
+mujeres.forEach(([n,p]) => { html += row('row-women', n, p); });
+
+// ── AUSENTES ─────────────────────────────────────────────────────────────────
+html += section('absent', '▸  Participantes Ausentes — No detectados en capturas');
+const ausentes = [
+  'Alexandre Nabuco',
+  'Claudionir - Track Caminho dos Príncipes',
+  'Daniel Vale - São Paulo / Brasil',
+  'Denilson Morales',
+  'hamilton marciano dos santos júnior',
+  'Jorge Leandro',
+  'Jose Lobo',
+  'Kaue Rejas',
+  'Legendarios UK',
+  'OSMARTH LR',
+  'Paulo Muller',
+  'Ricardo Bernardes',
+  'Samuel Ramirez',
+  'Sherlyn Romero',
+  'Tato Sales',
+  'Tavito Diaz',
+  'Weslley Silva',
+];
+ausentes.forEach(n => {
+  html += row('row-absent', n, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+});
+
+// ── FOOTER ───────────────────────────────────────────────────────────────────
+html += `<tr class="footer-row">
+  <td class="td-name">TOTAL POR CAPTURA</td>`;
+
+// count per capture column
+const allRows = [
+  [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1],
+  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,1],
+  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
+  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+  [0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,1],
+  [0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+  [0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0],
+  [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [0,0,0,1,1,1,1,1,1,1,0,1,0,0,0,1],
+  [0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,0],
+  [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1],
+  [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1],
+  [0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1],
+  // mujeres
+  [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0],
+  [0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0],
+];
+
+for(let c=0; c<16; c++){
+  const t = allRows.reduce((s,r)=>s+r[c],0);
+  html += `<td>${t}</td>`;
+}
+html += `<td>${allRows.reduce((s,r)=>s+r.reduce((a,b)=>a+b,0),0)}</td></tr>`;
+
+tbody.innerHTML = html;
+</script>
+</body>
+</html>
